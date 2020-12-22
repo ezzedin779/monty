@@ -40,21 +40,12 @@ int _interpreter(FILE *file)
 {
 	stack_t *stack = NULL;
 	char *line = NULL;
-	size_t buf_size = 0;
-	size_t ex = EXIT_SUCCESS;
-	unsigned int line_count = 0;
-	unsigned int _tok_len = 0;
-	void(*op_fun)(stack_t **f, unsigned int count);
+	size_t buf_size = 0, ex = EXIT_SUCCESS;
+	unsigned int line_count = 0, _tok_len = 0;
+	void (*op_fun)(stack_t **f, unsigned int count);
 
-	&stack = malloc(sizeof(stack_t));
-	if (&stack == NULL)
-	{
-		fprintf(stderr, "Error: malloc failed\n");
+	if (init_stack(&stack) == EXIT_FAILURE)
 		return (EXIT_FAILURE);
-	}
-	(&stack)->n = STACK;
-	(&stack)->prev = NULL;
-	(&stack)->next = NULL;
 	while (getline(&line, &buf_size, file) != -1)
 	{
 		line_count++;
@@ -64,13 +55,7 @@ int _interpreter(FILE *file)
 			if (empty_check(line, DELIM))
 				continue;
 			free_stack(&stack);
-			fprintf(stderr, "Error: malloc failed\n");
-			return (EXIT_FAILURE);
-		}
-		else if (tokens[0][0] == '#')
-		{
-			free_tokens();
-			continue;
+			return (malloc_error());
 		}
 		op_fun = get_fun(tokens[0]);
 		if (op_fun == NULL)
@@ -97,8 +82,7 @@ int _interpreter(FILE *file)
 	if (line && *line == 0)
 	{
 		free(line);
-		fprintf(stderr, "Error: malloc failed\n");
-		return (EXIT_FAILURE);
+		return (malloc_error());
 	}
 	free(line);
 	return (ex);
